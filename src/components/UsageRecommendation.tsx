@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PriceData } from "@/services/priceService";
+import { cn } from "@/lib/utils";
 
 type UsageRecommendationProps = {
   data: PriceData[];
