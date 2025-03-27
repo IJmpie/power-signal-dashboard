@@ -5,13 +5,20 @@ import { cn } from "@/lib/utils";
 
 type UsageRecommendationProps = {
   data: PriceData[];
+  customThresholds?: {
+    high: number;
+    medium: number;
+  };
 };
 
-export default function UsageRecommendation({ data }: UsageRecommendationProps) {
-  // Group prices by high, medium, low
-  const highPrices = data.filter(price => price.totalPrice >= 0.40);
-  const mediumPrices = data.filter(price => price.totalPrice >= 0.25 && price.totalPrice < 0.40);
-  const lowPrices = data.filter(price => price.totalPrice < 0.25);
+export default function UsageRecommendation({ 
+  data, 
+  customThresholds = { high: 0.40, medium: 0.25 } 
+}: UsageRecommendationProps) {
+  // Group prices by high, medium, low using custom thresholds
+  const highPrices = data.filter(price => price.totalPrice >= customThresholds.high);
+  const mediumPrices = data.filter(price => price.totalPrice >= customThresholds.medium && price.totalPrice < customThresholds.high);
+  const lowPrices = data.filter(price => price.totalPrice < customThresholds.medium);
 
   // Determine if we have enough low price periods
   const hasLowPrices = lowPrices.length > 0;

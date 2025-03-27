@@ -114,6 +114,7 @@
   
   .traffic-light-container {
     @apply relative flex flex-col items-center justify-center bg-black/90 dark:bg-black/95 rounded-md p-2 overflow-hidden border border-gray-700 dark:border-gray-600;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 0, 0, 0.2);
   }
   
   .traffic-light {
@@ -122,6 +123,7 @@
   
   .traffic-light-active {
     @apply animate-glow shadow-lg;
+    filter: brightness(1.2);
   }
   
   .traffic-light-inactive {

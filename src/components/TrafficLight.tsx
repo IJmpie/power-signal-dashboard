@@ -4,16 +4,24 @@ import { cn } from "@/lib/utils";
 type TrafficLightProps = {
   currentPrice: number;
   className?: string;
+  customThresholds?: {
+    high: number;
+    medium: number;
+  };
 };
 
-export default function TrafficLight({ currentPrice, className }: TrafficLightProps) {
-  const isRed = currentPrice >= 0.40;
-  const isYellow = currentPrice >= 0.25 && currentPrice < 0.40;
-  const isGreen = currentPrice < 0.25;
+export default function TrafficLight({ 
+  currentPrice, 
+  className,
+  customThresholds = { high: 0.40, medium: 0.25 }
+}: TrafficLightProps) {
+  const isRed = currentPrice >= customThresholds.high;
+  const isYellow = currentPrice >= customThresholds.medium && currentPrice < customThresholds.high;
+  const isGreen = currentPrice < customThresholds.medium;
 
   return (
     <div className={cn(
-      "traffic-light-container rounded-xl py-6 px-3 flex flex-col items-center justify-center gap-4 shadow-lg", 
+      "traffic-light-container rounded-xl py-6 px-3 flex flex-col items-center justify-center gap-4 shadow-lg border-2 border-gray-700 dark:border-gray-500 scale-110 transform hover:scale-115 transition-transform duration-300", 
       className
     )}>
       <div
