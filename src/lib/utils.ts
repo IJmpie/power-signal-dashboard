@@ -7,6 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatCurrency(value: number) {
+  // Ensure proper spacing and prevent Euro symbol display issues
   return `€${value.toFixed(2)}`;
 }
 

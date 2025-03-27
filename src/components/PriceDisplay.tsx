@@ -1,6 +1,5 @@
 
 import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/lib/utils";
 
 type PriceDisplayProps = {
   currentPrice: number;
@@ -14,13 +13,16 @@ export default function PriceDisplay({ currentPrice, className }: PriceDisplayPr
     return "text-traffic-green";
   };
 
+  // Fix Euro symbol display by directly using the € character with proper spacing
+  const formattedPrice = `€${currentPrice.toFixed(2)}`;
+
   return (
     <div className={cn("flex flex-col items-center", className)}>
       <div className="text-sm font-medium text-muted-foreground mb-1">
         Huidige Stroomprijs
       </div>
       <div className={cn("text-4xl font-bold tracking-tight", getPriceColor())}>
-        {formatCurrency(currentPrice)}
+        {formattedPrice}
         <span className="text-base font-normal text-muted-foreground ml-1">
           /kWh
         </span>

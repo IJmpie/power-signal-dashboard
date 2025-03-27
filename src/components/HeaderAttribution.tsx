@@ -1,15 +1,22 @@
 
 import { cn } from "@/lib/utils";
 
-export default function HeaderAttribution() {
+type HeaderAttributionProps = {
+  className?: string;
+  compact?: boolean;
+};
+
+export default function HeaderAttribution({ className, compact = false }: HeaderAttributionProps) {
   return (
-    <div className="flex items-center gap-3">
+    <div className={cn("flex items-center gap-2", className)}>
       <img 
         src="/lovable-uploads/b555600b-e096-4564-9504-2c1ae9139d38.png" 
         alt="Frank Energie" 
-        className="h-8 object-contain"
+        className={cn("object-contain", compact ? "h-6" : "h-8")}
       />
-      <span className="text-sm font-medium">Prijzen door Frank Energie</span>
+      {!compact && (
+        <span className="text-sm font-medium">Prijzen door Frank Energie</span>
+      )}
     </div>
   );
 }
