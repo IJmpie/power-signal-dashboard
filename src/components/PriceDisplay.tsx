@@ -25,6 +25,9 @@ export default function PriceDisplay({ currentPrice, className }: PriceDisplayPr
           /kWh
         </span>
       </div>
+      <div className="text-xs text-muted-foreground mt-1">
+        Inclusief belastingen en netbeheerkosten
+      </div>
     </div>
   );
 }

@@ -12,6 +12,10 @@ import ThemeToggle from "@/components/ThemeToggle";
 import TrafficLight from "@/components/TrafficLight";
 import PriceDisplay from "@/components/PriceDisplay";
 import PriceChart from "@/components/PriceChart";
+import NotificationSettings from "@/components/NotificationSettings";
+import PriceInfoCard from "@/components/PriceInfoCard";
+import SourceAttribution from "@/components/SourceAttribution";
+import UsageRecommendation from "@/components/UsageRecommendation";
 import { RefreshCw } from "lucide-react";
 
 const Index = () => {
@@ -105,6 +109,16 @@ const Index = () => {
           ) : (
             <PriceChart data={priceData} />
           )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {!isLoading && <PriceInfoCard data={priceData} />}
+          <NotificationSettings />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {!isLoading && <UsageRecommendation data={priceData} />}
+          <SourceAttribution />
         </div>
       </main>
     </div>

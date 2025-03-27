@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { format } from "date-fns";
+import { format, addHours } from "date-fns";
 import { nl } from "date-fns/locale";
 import {
   Area,
@@ -10,7 +10,8 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis
+  YAxis,
+  ReferenceLine
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,7 +66,7 @@ export default function PriceChart({ data }: PriceChartProps) {
     if (active && payload && payload.length) {
       const price = payload[0].value;
       return (
-        <div className="p-3 text-sm">
+        <div className="p-3 text-sm bg-background/80 dark:bg-background/90 backdrop-blur-sm border rounded-md shadow-md">
           <p className="font-medium">{formatTooltipTime(label)}</p>
           <p className="flex items-center mt-1">
             <span 
@@ -73,6 +74,9 @@ export default function PriceChart({ data }: PriceChartProps) {
               style={{ backgroundColor: getPriceColor(price) }}
             />
             <span>{formatCurrency(price)}/kWh</span>
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {price < averagePrice ? "Lager dan gemiddeld" : "Hoger dan gemiddeld"}
           </p>
         </div>
       );
@@ -85,10 +89,24 @@ export default function PriceChart({ data }: PriceChartProps) {
     return `€${value.toFixed(2)}`;
   };
 
+  // Find where actual data ends and prediction begins
+  const now = new Date();
+  const currentHour = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    now.getHours()
+  );
+  
   // Calculate average price
   const averagePrice = data.length
     ? data.reduce((total, item) => total + item.totalPrice, 0) / data.length
     : 0;
+
+  // Determine best time to use electricity
+  const cheapestHours = [...data]
+    .sort((a, b) => a.totalPrice - b.totalPrice)
+    .slice(0, 5);
 
   return (
     <Card className="glass-card">
@@ -135,8 +153,10 @@ export default function PriceChart({ data }: PriceChartProps) {
             >
               <defs>
                 <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0066FF" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#0066FF" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#FF3B30" stopOpacity={0.2} />
+                  <stop offset="33%" stopColor="#FFCC00" stopOpacity={0.2} />
+                  <stop offset="66%" stopColor="#34C759" stopOpacity={0.2} />
+                  <stop offset="100%" stopColor="#34C759" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} />
@@ -158,6 +178,28 @@ export default function PriceChart({ data }: PriceChartProps) {
                 width={50}
               />
               <Tooltip content={<CustomTooltip />} />
+              <ReferenceLine 
+                y={averagePrice} 
+                stroke="#555" 
+                strokeDasharray="3 3"
+                label={{
+                  value: "Gemiddelde",
+                  position: "insideTopRight",
+                  fill: "#555",
+                  fontSize: 10
+                }}
+              />
+              <ReferenceLine 
+                x={currentHour.toISOString()} 
+                stroke="#555" 
+                strokeDasharray="5 5"
+                label={{
+                  value: "Nu",
+                  position: "insideTopLeft",
+                  fill: "#555",
+                  fontSize: 10
+                }}
+              />
               <Area
                 type="monotone"
                 dataKey="totalPrice"
@@ -169,14 +211,18 @@ export default function PriceChart({ data }: PriceChartProps) {
                 animationDuration={1000}
                 dot={(props) => {
                   const { cx, cy, payload } = props;
+                  const date = new Date(payload.from);
+                  const isPrediction = date > currentHour;
+                  
                   return (
                     <circle 
                       cx={cx} 
                       cy={cy} 
                       r={4} 
                       fill={getPriceColor(payload.totalPrice)} 
-                      stroke="white" 
-                      strokeWidth={1} 
+                      stroke={isPrediction ? "#555" : "white"}
+                      strokeWidth={isPrediction ? 2 : 1}
+                      strokeDasharray={isPrediction ? "1 1" : "0"}
                     />
                   );
                 }}
