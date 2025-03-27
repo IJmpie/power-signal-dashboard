@@ -113,15 +113,15 @@
   }
   
   .traffic-light-container {
-    @apply relative flex flex-col items-center justify-center bg-black/90 dark:bg-black/95 rounded-md p-2 overflow-hidden;
+    @apply relative flex flex-col items-center justify-center bg-black/90 dark:bg-black/95 rounded-md p-2 overflow-hidden border border-gray-700 dark:border-gray-600;
   }
   
   .traffic-light {
-    @apply w-16 h-16 md:w-20 md:h-20 my-2 flex items-center justify-center transition-all duration-300 ease-in-out rounded-none;
+    @apply w-16 h-16 md:w-20 md:h-20 my-2 flex items-center justify-center transition-all duration-300 ease-in-out shadow-lg;
   }
   
   .traffic-light-active {
-    @apply animate-glow;
+    @apply animate-glow shadow-lg;
   }
   
   .traffic-light-inactive {
