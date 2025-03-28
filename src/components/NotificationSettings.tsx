@@ -8,18 +8,91 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function NotificationSettings() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [volume, setVolume] = useState(50);
   const [thresholdPrice, setThresholdPrice] = useState(0.20);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
+    // Get notification settings from localStorage
+    const savedSettings = localStorage.getItem('notificationSettings');
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      setVolume(settings.volume || 50);
+      setThresholdPrice(settings.thresholdPrice || 0.20);
+      setNotificationsEnabled(settings.enabled || false);
+    }
+    
+    // Check if notifications are already granted
     if ("Notification" in window) {
       setNotificationPermission(Notification.permission);
+      
+      // Register service worker for background notifications
+      if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+        registerServiceWorker();
+      }
     }
   }, []);
+
+  useEffect(() => {
+    // Save settings to localStorage whenever they change
+    const settings = {
+      enabled: notificationsEnabled,
+      volume,
+      thresholdPrice
+    };
+    localStorage.setItem('notificationSettings', JSON.stringify(settings));
+    
+    // Save to Supabase if user is logged in
+    saveSettingsToSupabase();
+  }, [notificationsEnabled, volume, thresholdPrice]);
+  
+  const saveSettingsToSupabase = async () => {
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('user_settings')
+          .upsert({
+            user_id: user.id,
+            notification_enabled: notificationsEnabled,
+            notification_volume: volume,
+            price_threshold: thresholdPrice
+          }, { onConflict: 'user_id' });
+          
+        if (error) throw error;
+      } catch (error) {
+        console.error("Error saving notification settings:", error);
+      }
+    }
+  };
+
+  const registerServiceWorker = async () => {
+    try {
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.register('/service-worker.js');
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        
+        // Send the current settings to the service worker
+        if (registration.active) {
+          registration.active.postMessage({
+            type: 'NOTIFICATION_SETTINGS',
+            settings: {
+              enabled: notificationsEnabled, 
+              threshold: thresholdPrice,
+              volume
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('ServiceWorker registration failed: ', error);
+    }
+  };
 
   const handleVolumeChange = (value: number[]) => {
     setVolume(value[0]);
@@ -37,6 +110,9 @@ export default function NotificationSettings() {
       if (permission === "granted") {
         setNotificationsEnabled(true);
         toast.success("Notificaties zijn nu ingeschakeld!");
+        
+        // Register service worker for background notifications
+        registerServiceWorker();
       } else {
         toast.error("Je moet notificaties toestaan om meldingen te ontvangen");
       }

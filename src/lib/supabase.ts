@@ -1,23 +1,21 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-// For development purposes only - in production these should be set as environment variables
-// via the Lovable Supabase integration
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 
-  'https://your-project-url.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 
-  'your-anon-key';
+// For development testing - replace with your actual Supabase project details
+// Get these from your Supabase project dashboard
+const supabaseUrl = 'https://xyzcompany.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; 
 
 // Check if we have the required configuration
-if (!supabaseUrl || supabaseUrl === 'https://your-project-url.supabase.co') {
+if (!supabaseUrl || supabaseUrl === 'https://xyzcompany.supabase.co') {
   console.warn(
-    'Supabase URL not configured properly. Please set up your Supabase project and update the URL.'
+    'Supabase URL not configured properly. Please set up your Supabase project and update the URL in src/lib/supabase.ts.'
   );
 }
 
-if (!supabaseAnonKey || supabaseAnonKey === 'your-anon-key') {
+if (!supabaseAnonKey || supabaseAnonKey === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...') {
   console.warn(
-    'Supabase Anon Key not configured properly. Please set up your Supabase project and update the key.'
+    'Supabase Anon Key not configured properly. Please set up your Supabase project and update the key in src/lib/supabase.ts.'
   );
 }
 
