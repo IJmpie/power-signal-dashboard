@@ -1,96 +1,189 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Info } from "lucide-react";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-type PriceThresholdSettingsProps = {
+export type PriceThresholdSettingsProps = {
   initialHighThreshold: number;
   initialLowThreshold: number;
-  onThresholdsChange: (highThreshold: number, mediumThreshold: number, lowThreshold: number) => void;
-  initialMediumThreshold?: number; // Make medium optional
+  onThresholdsChange: (high: number, low: number) => void;
 };
 
 export default function PriceThresholdSettings({
   initialHighThreshold,
   initialLowThreshold,
-  onThresholdsChange,
-  initialMediumThreshold = 0.25 // Default value
+  onThresholdsChange
 }: PriceThresholdSettingsProps) {
   const [highThreshold, setHighThreshold] = useState(initialHighThreshold);
   const [lowThreshold, setLowThreshold] = useState(initialLowThreshold);
-  
-  // We still maintain mediumThreshold internally for compatibility
-  const [mediumThreshold, setMediumThreshold] = useState(initialMediumThreshold);
+  const [changed, setChanged] = useState(false);
+
+  useEffect(() => {
+    setHighThreshold(initialHighThreshold);
+    setLowThreshold(initialLowThreshold);
+  }, [initialHighThreshold, initialLowThreshold]);
+
+  const handleHighThresholdChange = (value: number[]) => {
+    const newValue = value[0];
+    if (newValue > lowThreshold) {
+      setHighThreshold(newValue);
+      setChanged(true);
+    }
+  };
+
+  const handleLowThresholdChange = (value: number[]) => {
+    const newValue = value[0];
+    if (newValue < highThreshold) {
+      setLowThreshold(newValue);
+      setChanged(true);
+    }
+  };
+
+  const handleHighInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (!isNaN(value) && value > lowThreshold) {
+      setHighThreshold(value);
+      setChanged(true);
+    }
+  };
+
+  const handleLowInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (!isNaN(value) && value < highThreshold) {
+      setLowThreshold(value);
+      setChanged(true);
+    }
+  };
 
   const handleSave = () => {
-    // Validate thresholds
-    if (highThreshold <= lowThreshold) {
-      toast.error("Hoge prijsdrempel moet hoger zijn dan lage prijsdrempel");
-      return;
-    }
-    
-    if (lowThreshold < 0 || highThreshold <= 0) {
-      toast.error("Prijsdrempels moeten positief zijn");
-      return;
-    }
-
-    // Calculate medium threshold automatically as the middle point
-    const calculatedMediumThreshold = (highThreshold + lowThreshold) / 2;
-    setMediumThreshold(calculatedMediumThreshold);
-    
-    onThresholdsChange(highThreshold, calculatedMediumThreshold, lowThreshold);
-    toast.success("Prijsdrempels opgeslagen");
+    onThresholdsChange(highThreshold, lowThreshold);
+    setChanged(false);
   };
 
   return (
-    <Card className="glass-card w-full">
-      <CardHeader>
-        <CardTitle className="text-lg">Pas prijsdrempels aan</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="high-threshold">Hoge prijs vanaf (€/kWh):</Label>
-          <div className="flex items-center gap-2">
-            <Input
-              id="high-threshold"
-              type="number"
-              step="0.01"
-              min="0"
-              value={highThreshold}
-              onChange={(e) => setHighThreshold(parseFloat(e.target.value))}
-            />
-            <div className="w-6 h-6 rounded-full bg-traffic-red flex-shrink-0"></div>
-          </div>
+    <Card className="p-4">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <h2 className="text-lg font-medium">Pas prijsdrempels aan</h2>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" className="p-0 h-8 w-8 ml-1">
+                  <Info className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Pas de drempelwaarden aan om de stoplichtlkleuren te wijzigen</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
-        
+        {changed && (
+          <Button size="sm" onClick={handleSave}>
+            Opslaan
+          </Button>
+        )}
+      </div>
+      
+      <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="low-threshold">Lage prijs vanaf (€/kWh):</Label>
-          <div className="flex items-center gap-2">
-            <Input
-              id="low-threshold"
-              type="number"
-              step="0.01"
-              min="0"
-              value={lowThreshold}
-              onChange={(e) => setLowThreshold(parseFloat(e.target.value))}
-            />
-            <div className="w-6 h-6 rounded-full bg-traffic-green flex-shrink-0"></div>
+          <div className="flex justify-between items-center">
+            <Label htmlFor="high-threshold" className="text-traffic-red">
+              Hoge prijs drempel
+            </Label>
+            <div className="flex items-center">
+              <span className="mr-2">€</span>
+              <Input 
+                id="high-threshold-input"
+                type="number"
+                value={highThreshold.toString()}
+                onChange={handleHighInputChange}
+                className="w-20"
+                step={0.01}
+                min={lowThreshold + 0.01}
+                max={0.60}
+              />
+              <span className="ml-2">/kWh</span>
+            </div>
           </div>
-        </div>
-        
-        <div className="pt-2">
-          <Button onClick={handleSave} className="w-full">Opslaan</Button>
+          <Slider 
+            id="high-threshold"
+            min={0.10} 
+            max={0.60} 
+            step={0.01} 
+            value={[highThreshold]} 
+            onValueChange={handleHighThresholdChange}
+            className="h-2"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>€0.10</span>
+            <span>€0.60</span>
+          </div>
         </div>
 
-        <div className="text-xs text-muted-foreground mt-2">
-          <p>Prijzen onder {lowThreshold.toFixed(2)}€/kWh worden als laag beschouwd (groen).</p>
-          <p>Prijzen tussen {lowThreshold.toFixed(2)}€/kWh en {highThreshold.toFixed(2)}€/kWh worden als gemiddeld beschouwd (geel).</p>
-          <p>Prijzen boven {highThreshold.toFixed(2)}€/kWh worden als hoog beschouwd (rood).</p>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="low-threshold" className="text-traffic-green">
+              Lage prijs drempel
+            </Label>
+            <div className="flex items-center">
+              <span className="mr-2">€</span>
+              <Input 
+                id="low-threshold-input"
+                type="number"
+                value={lowThreshold.toString()}
+                onChange={handleLowInputChange}
+                className="w-20"
+                step={0.01}
+                min={0.10}
+                max={highThreshold - 0.01}
+              />
+              <span className="ml-2">/kWh</span>
+            </div>
+          </div>
+          <Slider 
+            id="low-threshold"
+            min={0.10} 
+            max={0.60} 
+            step={0.01} 
+            value={[lowThreshold]} 
+            onValueChange={handleLowThresholdChange}
+            className="h-2"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>€0.10</span>
+            <span>€0.60</span>
+          </div>
         </div>
-      </CardContent>
+      </div>
+      
+      <div className="mt-4">
+        <h3 className="font-medium mb-2">Huidige instellingen:</h3>
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center">
+            <div className="w-3 h-3 rounded-full bg-traffic-red mr-2" />
+            <span>Hoge prijs: &gt; €{highThreshold.toFixed(2)}/kWh</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-3 h-3 rounded-full bg-traffic-yellow mr-2" />
+            <span>Gemiddelde prijs: €{lowThreshold.toFixed(2)} - €{highThreshold.toFixed(2)}/kWh</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-3 h-3 rounded-full bg-traffic-green mr-2" />
+            <span>Lage prijs: &lt; €{lowThreshold.toFixed(2)}/kWh</span>
+          </div>
+        </div>
+      </div>
     </Card>
   );
 }

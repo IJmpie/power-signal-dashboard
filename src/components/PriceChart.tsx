@@ -19,36 +19,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PriceData } from "@/services/priceService";
 import { ZoomIn, ZoomOut } from "lucide-react";
 
-type TimeRange = "1h" | "12h" | "24h" | "custom";
-
 type PriceChartProps = {
   data: PriceData[];
 };
 
 export default function PriceChart({ data }: PriceChartProps) {
-  const [timeRange, setTimeRange] = useState<TimeRange>("24h");
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const isMobile = useIsMobile();
   const chartRef = useRef<HTMLDivElement>(null);
-
-  const filterDataByTimeRange = (range: TimeRange) => {
-    const now = new Date();
-    
-    switch(range) {
-      case "1h":
-        const oneHourAgo = new Date(now.getTime() - (1 * 60 * 60 * 1000));
-        return data.filter(item => new Date(item.from) >= oneHourAgo);
-      case "12h":
-        const twelveHoursAgo = new Date(now.getTime() - (12 * 60 * 60 * 1000));
-        return data.filter(item => new Date(item.from) >= twelveHoursAgo);
-      case "24h":
-      default:
-        const twentyFourHoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-        return data.filter(item => new Date(item.from) >= twentyFourHoursAgo);
-    }
-  };
-
-  const filteredData = filterDataByTimeRange(timeRange);
   
   const getPriceColor = (price: number) => {
     if (price >= 0.40) return "#FF0000"; // Brighter red
@@ -130,37 +108,6 @@ export default function PriceChart({ data }: PriceChartProps) {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl">Prijsverloop</CardTitle>
-          <div className="flex space-x-1">
-            <Button 
-              variant={timeRange === "1h" ? "default" : "outline"} 
-              size="sm" 
-              onClick={() => setTimeRange("1h")}
-              className="text-xs h-8"
-            >
-              1u
-            </Button>
-            <Button 
-              variant={timeRange === "12h" ? "default" : "outline"} 
-              size="sm" 
-              onClick={() => setTimeRange("12h")}
-              className="text-xs h-8"
-            >
-              12u
-            </Button>
-            <Button 
-              variant={timeRange === "24h" ? "default" : "outline"} 
-              size="sm" 
-              onClick={() => setTimeRange("24h")}
-              className="text-xs h-8"
-            >
-              24u
-            </Button>
-          </div>
-        </div>
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-muted-foreground mt-2">
-            Gemiddelde prijs: <span className="font-medium">{formatCurrency(averagePrice)}/kWh</span>
-          </div>
           <div className="flex gap-1">
             <Button 
               variant="outline" 
@@ -180,12 +127,15 @@ export default function PriceChart({ data }: PriceChartProps) {
             </Button>
           </div>
         </div>
+        <div className="text-sm text-muted-foreground mt-2">
+          Gemiddelde prijs: <span className="font-medium">{formatCurrency(averagePrice)}/kWh</span>
+        </div>
       </CardHeader>
       <CardContent>
         <div ref={chartRef} className="chart-container" style={{ height: getChartHeight() + 'px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
-              data={filteredData}
+              data={data}
               margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
             >
               <defs>
@@ -206,8 +156,8 @@ export default function PriceChart({ data }: PriceChartProps) {
                 axisLine={false}
               />
               <YAxis 
-                domain={[0.15, 0.60]} 
-                ticks={[0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60]}
+                domain={[0.10, 0.60]} 
+                ticks={[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60]}
                 tickFormatter={(value) => `€${value.toFixed(2)}`}
                 tickMargin={10}
                 tickLine={false}
@@ -269,7 +219,16 @@ export default function PriceChart({ data }: PriceChartProps) {
                 height={30} 
                 stroke="#8884d8" 
                 tickFormatter={formatXAxis}
-                startIndex={Math.max(0, filteredData.length - 12)}
+                startIndex={Math.max(0, data.length - 12)}
+                onChange={(e) => {
+                  // Calculate zoom based on the brush selection
+                  if (e && e.startIndex !== undefined && e.endIndex !== undefined) {
+                    const range = e.endIndex - e.startIndex;
+                    const totalPoints = data.length;
+                    const zoomFactor = totalPoints / Math.max(range, 1);
+                    setZoomLevel(Math.min(Math.max(zoomFactor * 0.5, 0.5), 2));
+                  }
+                }}
               />
             </AreaChart>
           </ResponsiveContainer>
