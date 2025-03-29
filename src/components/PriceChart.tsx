@@ -25,10 +25,6 @@ type PriceChartProps = {
 
 export default function PriceChart({ data }: PriceChartProps) {
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [brushIndices, setBrushIndices] = useState<{startIndex: number, endIndex: number}>({
-    startIndex: Math.max(0, data.length - 12),
-    endIndex: data.length - 1
-  });
   const isMobile = useIsMobile();
   const chartRef = useRef<HTMLDivElement>(null);
   
@@ -98,49 +94,12 @@ export default function PriceChart({ data }: PriceChartProps) {
   const handleZoomIn = () => {
     if (zoomLevel < 2) {
       setZoomLevel(zoomLevel + 0.25);
-      
-      // When zooming in, narrow the brush range by shrinking from both ends
-      if (brushIndices.endIndex - brushIndices.startIndex > 3) {
-        const rangeSize = brushIndices.endIndex - brushIndices.startIndex;
-        const newRangeSize = Math.max(3, Math.floor(rangeSize * 0.8));
-        const pointsToRemove = rangeSize - newRangeSize;
-        
-        setBrushIndices({
-          startIndex: brushIndices.startIndex + Math.floor(pointsToRemove / 2),
-          endIndex: brushIndices.endIndex - Math.ceil(pointsToRemove / 2)
-        });
-      }
     }
   };
 
   const handleZoomOut = () => {
     if (zoomLevel > 0.5) {
       setZoomLevel(zoomLevel - 0.25);
-      
-      // When zooming out, expand the brush range
-      const rangeSize = brushIndices.endIndex - brushIndices.startIndex;
-      const newRangeSize = Math.min(data.length - 1, Math.floor(rangeSize * 1.25));
-      const pointsToAdd = newRangeSize - rangeSize;
-      
-      setBrushIndices({
-        startIndex: Math.max(0, brushIndices.startIndex - Math.floor(pointsToAdd / 2)),
-        endIndex: Math.min(data.length - 1, brushIndices.endIndex + Math.ceil(pointsToAdd / 2))
-      });
-    }
-  };
-
-  const handleBrushChange = (e: any) => {
-    if (e && e.startIndex !== undefined && e.endIndex !== undefined) {
-      setBrushIndices({
-        startIndex: e.startIndex,
-        endIndex: e.endIndex
-      });
-      
-      // Calculate zoom based on the brush selection
-      const range = e.endIndex - e.startIndex;
-      const totalPoints = data.length;
-      const zoomFactor = totalPoints / Math.max(range, 1);
-      setZoomLevel(Math.min(Math.max(zoomFactor * 0.5, 0.5), 2));
     }
   };
 
@@ -260,9 +219,16 @@ export default function PriceChart({ data }: PriceChartProps) {
                 height={30} 
                 stroke="#8884d8" 
                 tickFormatter={formatXAxis}
-                startIndex={brushIndices.startIndex}
-                endIndex={brushIndices.endIndex}
-                onChange={handleBrushChange}
+                startIndex={Math.max(0, data.length - 12)}
+                onChange={(e) => {
+                  // Calculate zoom based on the brush selection
+                  if (e && e.startIndex !== undefined && e.endIndex !== undefined) {
+                    const range = e.endIndex - e.startIndex;
+                    const totalPoints = data.length;
+                    const zoomFactor = totalPoints / Math.max(range, 1);
+                    setZoomLevel(Math.min(Math.max(zoomFactor * 0.5, 0.5), 2));
+                  }
+                }}
               />
             </AreaChart>
           </ResponsiveContainer>
