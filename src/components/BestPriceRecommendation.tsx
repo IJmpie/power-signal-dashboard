@@ -30,7 +30,7 @@ export default function BestPriceRecommendation({
   // Find the minimum price in the future
   const lowestPrice = futurePrices.reduce(
     (min, price) => price.totalPrice < min.totalPrice ? price : min, 
-    futurePrices[0] || { totalPrice: Infinity }
+    futurePrices[0] || { totalPrice: Infinity, from: '', till: '' }
   );
   
   // No future prices available

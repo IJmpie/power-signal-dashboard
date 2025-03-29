@@ -17,8 +17,7 @@ self.addEventListener('push', (event) => {
     badge: '/favicon.ico',
     data: {
       url: data.url || self.registration.scope
-    },
-    vibrate: [200, 100, 200]
+    }
   };
 
   event.waitUntil(
