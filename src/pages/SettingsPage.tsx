@@ -12,18 +12,18 @@ import { Button } from "@/components/ui/button";
 export default function SettingsPage() {
   const [thresholds, setThresholds] = useState(() => {
     const savedThresholds = localStorage.getItem('priceThresholds');
-    return savedThresholds ? JSON.parse(savedThresholds) : { high: 0.40, low: 0.15 };
+    return savedThresholds ? JSON.parse(savedThresholds) : { high: 0.40, medium: 0.25, low: 0.15 };
   });
 
   useEffect(() => {
     document.title = "Instellingen - Stroomprijs Stoplicht";
   }, []);
 
-  const handleThresholdsChange = (high: number, low: number) => {
-    // Calculate an intermediate value for medium for backward compatibility
-    const medium = (high + low) / 2;
-    setThresholds({ high, medium, low });
-    localStorage.setItem('priceThresholds', JSON.stringify({ high, medium, low }));
+  const handleThresholdsChange = (high: number, low: number, medium?: number) => {
+    // Use provided medium or calculate it
+    const mediumValue = medium !== undefined ? medium : (high + low) / 2;
+    setThresholds({ high, medium: mediumValue, low });
+    localStorage.setItem('priceThresholds', JSON.stringify({ high, medium: mediumValue, low }));
   };
 
   return (
@@ -53,6 +53,7 @@ export default function SettingsPage() {
             <PriceThresholdSettings 
               initialHighThreshold={thresholds.high}
               initialLowThreshold={thresholds.low}
+              initialMediumThreshold={thresholds.medium}
               onThresholdsChange={handleThresholdsChange}
             />
 

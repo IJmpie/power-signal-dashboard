@@ -16,12 +16,14 @@ import {
 export type PriceThresholdSettingsProps = {
   initialHighThreshold: number;
   initialLowThreshold: number;
-  onThresholdsChange: (high: number, low: number) => void;
+  initialMediumThreshold?: number;
+  onThresholdsChange: (high: number, low: number, medium?: number) => void;
 };
 
 export default function PriceThresholdSettings({
   initialHighThreshold,
   initialLowThreshold,
+  initialMediumThreshold,
   onThresholdsChange
 }: PriceThresholdSettingsProps) {
   const [highThreshold, setHighThreshold] = useState(initialHighThreshold);
@@ -66,7 +68,9 @@ export default function PriceThresholdSettings({
   };
 
   const handleSave = () => {
-    onThresholdsChange(highThreshold, lowThreshold);
+    // Calculate medium as the middle value between high and low
+    const medium = (highThreshold + lowThreshold) / 2;
+    onThresholdsChange(highThreshold, lowThreshold, medium);
     setChanged(false);
   };
 
