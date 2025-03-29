@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { format, addHours } from "date-fns";
+import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import {
   Area,
@@ -47,9 +47,9 @@ export default function PriceChart({ data }: PriceChartProps) {
   const filteredData = filterDataByTimeRange(timeRange);
   
   const getPriceColor = (price: number) => {
-    if (price >= 0.40) return "#FF3B30";
-    if (price >= 0.25) return "#FFCC00";
-    return "#34C759";
+    if (price >= 0.40) return "#FF0000"; // Brighter red
+    if (price >= 0.25) return "#FFA500"; // More orange-yellow
+    return "#00CC00"; // Brighter green
   };
 
   const formatXAxis = (tickItem: string) => {
@@ -103,11 +103,6 @@ export default function PriceChart({ data }: PriceChartProps) {
     ? data.reduce((total, item) => total + item.totalPrice, 0) / data.length
     : 0;
 
-  // Determine best time to use electricity
-  const cheapestHours = [...data]
-    .sort((a, b) => a.totalPrice - b.totalPrice)
-    .slice(0, 5);
-
   return (
     <Card className="glass-card">
       <CardHeader className="pb-2">
@@ -153,10 +148,10 @@ export default function PriceChart({ data }: PriceChartProps) {
             >
               <defs>
                 <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#FF3B30" stopOpacity={0.2} />
-                  <stop offset="33%" stopColor="#FFCC00" stopOpacity={0.2} />
-                  <stop offset="66%" stopColor="#34C759" stopOpacity={0.2} />
-                  <stop offset="100%" stopColor="#34C759" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#FF0000" stopOpacity={0.4} />
+                  <stop offset="33%" stopColor="#FFA500" stopOpacity={0.4} />
+                  <stop offset="66%" stopColor="#00CC00" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="#00CC00" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} />

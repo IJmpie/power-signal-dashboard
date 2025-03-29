@@ -18,7 +18,7 @@ export default function PriceDisplay({ currentPrice, className }: PriceDisplayPr
 
   return (
     <div className={cn("flex flex-col items-center", className)}>
-      <div className="text-sm font-medium text-muted-foreground mb-1">
+      <div className="text-sm font-medium text-muted-foreground mb-2 mt-2">
         Huidige Stroomprijs
       </div>
       <div className={cn("text-4xl font-bold tracking-tight", getPriceColor())}>

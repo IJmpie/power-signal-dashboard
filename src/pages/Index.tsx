@@ -14,11 +14,11 @@ import TrafficLight from "@/components/TrafficLight";
 import PriceDisplay from "@/components/PriceDisplay";
 import PriceChart from "@/components/PriceChart";
 import NotificationSettings from "@/components/NotificationSettings";
-import PriceInfoCard from "@/components/PriceInfoCard";
 import SourceAttribution from "@/components/SourceAttribution";
 import HeaderAttribution from "@/components/HeaderAttribution";
-import UsageRecommendation from "@/components/UsageRecommendation";
 import PriceThresholdSettings from "@/components/PriceThresholdSettings";
+import PriceChangeIndicator from "@/components/PriceChangeIndicator";
+import BestPriceRecommendation from "@/components/BestPriceRecommendation";
 import { RefreshCw } from "lucide-react";
 
 const Index = () => {
@@ -26,7 +26,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const [thresholds, setThresholds] = useState(() => {
     const savedThresholds = localStorage.getItem('priceThresholds');
-    return savedThresholds ? JSON.parse(savedThresholds) : { high: 0.40, medium: 0.25 };
+    return savedThresholds ? JSON.parse(savedThresholds) : { high: 0.40, medium: 0.25, low: 0.15 };
   });
 
   useEffect(() => {
@@ -48,10 +48,23 @@ const Index = () => {
     );
   };
 
-  const handleThresholdsChange = (high: number, medium: number) => {
-    setThresholds({ high, medium });
-    localStorage.setItem('priceThresholds', JSON.stringify({ high, medium }));
+  const handleThresholdsChange = (high: number, medium: number, low: number) => {
+    setThresholds({ high, medium, low });
+    localStorage.setItem('priceThresholds', JSON.stringify({ high, medium, low }));
   };
+
+  useEffect(() => {
+    // Register service worker for notifications
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        })
+        .catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/50 dark:from-background dark:to-background pb-16">
@@ -81,16 +94,23 @@ const Index = () => {
                     className="mb-2"
                   />
                 )}
-                
-                {isLoading ? (
-                  <>
-                    <Skeleton className="h-4 w-32 mb-2" />
-                    <Skeleton className="h-8 w-40" />
-                  </>
-                ) : (
-                  <PriceDisplay currentPrice={currentPrice} />
-                )}
               </div>
+              
+              {isLoading ? (
+                <>
+                  <Skeleton className="h-4 w-32 mb-2" />
+                  <Skeleton className="h-8 w-40" />
+                </>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <PriceDisplay currentPrice={currentPrice} />
+                  <PriceChangeIndicator 
+                    data={priceData} 
+                    currentPrice={currentPrice} 
+                    className="mt-2"
+                  />
+                </div>
+              )}
               
               <div className="mt-3 text-xs text-muted-foreground flex items-center">
                 <span>Laatste update: {lastUpdated ? formatFullDate(lastUpdated) : 'Laden...'}</span>
@@ -112,15 +132,15 @@ const Index = () => {
                 <div className="flex flex-col space-y-2">
                   <div className="flex items-center">
                     <div className="w-4 h-4 rounded-full bg-traffic-red mr-2" />
-                    <span>Hoog: &gt; €{thresholds.high.toFixed(2)}/kWh</span>
+                    <span className="text-traffic-red">Hoog: &gt; €{thresholds.high.toFixed(2)}/kWh</span>
                   </div>
                   <div className="flex items-center">
                     <div className="w-4 h-4 rounded-full bg-traffic-yellow mr-2" />
-                    <span>Gemiddeld: €{thresholds.medium.toFixed(2)} - €{thresholds.high.toFixed(2)}/kWh</span>
+                    <span className="text-traffic-yellow">Gemiddeld: €{thresholds.medium.toFixed(2)} - €{thresholds.high.toFixed(2)}/kWh</span>
                   </div>
                   <div className="flex items-center">
                     <div className="w-4 h-4 rounded-full bg-traffic-green mr-2" />
-                    <span>Laag: &lt; €{thresholds.medium.toFixed(2)}/kWh</span>
+                    <span className="text-traffic-green">Laag: &lt; €{thresholds.medium.toFixed(2)}/kWh</span>
                   </div>
                 </div>
               </div>
@@ -135,13 +155,27 @@ const Index = () => {
               <PriceChart data={priceData} />
             )}
 
-            {/* Recommendations */}
+            {/* Best price recommendation */}
             {!isLoading && (
-              <UsageRecommendation 
+              <BestPriceRecommendation 
                 data={priceData} 
                 customThresholds={thresholds}
               />
             )}
+            
+            {/* Price threshold settings */}
+            <PriceThresholdSettings 
+              initialHighThreshold={thresholds.high}
+              initialMediumThreshold={thresholds.medium}
+              initialLowThreshold={thresholds.low}
+              onThresholdsChange={handleThresholdsChange}
+            />
+            
+            {/* Notification settings */}
+            <NotificationSettings />
+            
+            {/* Source attribution */}
+            <SourceAttribution />
           </div>
         ) : (
           /* Desktop layout */
@@ -165,7 +199,14 @@ const Index = () => {
                     <Skeleton className="h-8 w-40" />
                   </>
                 ) : (
-                  <PriceDisplay currentPrice={currentPrice} />
+                  <div className="flex flex-col items-center">
+                    <PriceDisplay currentPrice={currentPrice} />
+                    <PriceChangeIndicator 
+                      data={priceData} 
+                      currentPrice={currentPrice} 
+                      className="mt-2"
+                    />
+                  </div>
                 )}
                 
                 <div className="mt-4 text-xs text-muted-foreground flex items-center">
@@ -187,15 +228,15 @@ const Index = () => {
                   <div className="mt-4 flex flex-col space-y-4">
                     <div className="flex items-center">
                       <div className="w-4 h-4 rounded-full bg-traffic-red mr-2" />
-                      <span>Hoog: &gt; €{thresholds.high.toFixed(2)}/kWh</span>
+                      <span className="text-traffic-red">Hoog: &gt; €{thresholds.high.toFixed(2)}/kWh</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-4 h-4 rounded-full bg-traffic-yellow mr-2" />
-                      <span>Gemiddeld: €{thresholds.medium.toFixed(2)} - €{thresholds.high.toFixed(2)}/kWh</span>
+                      <span className="text-traffic-yellow">Gemiddeld: €{thresholds.medium.toFixed(2)} - €{thresholds.high.toFixed(2)}/kWh</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-4 h-4 rounded-full bg-traffic-green mr-2" />
-                      <span>Laag: &lt; €{thresholds.medium.toFixed(2)}/kWh</span>
+                      <span className="text-traffic-green">Laag: &lt; €{thresholds.medium.toFixed(2)}/kWh</span>
                     </div>
                   </div>
                 </div>
@@ -213,25 +254,23 @@ const Index = () => {
                 <PriceChart data={priceData} />
               )}
 
-              {/* Price info and notifications */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {!isLoading && <PriceInfoCard data={priceData} />}
-                <NotificationSettings />
-              </div>
+              {/* Best price recommendation */}
+              {!isLoading && (
+                <BestPriceRecommendation 
+                  data={priceData} 
+                  customThresholds={thresholds}
+                />
+              )}
 
-              {/* Threshold settings and recommendations */}
+              {/* Price threshold and notifications */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <PriceThresholdSettings 
                   initialHighThreshold={thresholds.high}
                   initialMediumThreshold={thresholds.medium}
+                  initialLowThreshold={thresholds.low}
                   onThresholdsChange={handleThresholdsChange}
                 />
-                {!isLoading && (
-                  <UsageRecommendation 
-                    data={priceData} 
-                    customThresholds={thresholds}
-                  />
-                )}
+                <NotificationSettings />
               </div>
 
               {/* Source attribution */}
