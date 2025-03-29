@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -11,11 +11,13 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  ReferenceLine
+  ReferenceLine,
+  Brush
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PriceData } from "@/services/priceService";
+import { ZoomIn, ZoomOut } from "lucide-react";
 
 type TimeRange = "1h" | "12h" | "24h" | "custom";
 
@@ -25,7 +27,9 @@ type PriceChartProps = {
 
 export default function PriceChart({ data }: PriceChartProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>("24h");
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
   const isMobile = useIsMobile();
+  const chartRef = useRef<HTMLDivElement>(null);
 
   const filterDataByTimeRange = (range: TimeRange) => {
     const now = new Date();
@@ -103,6 +107,24 @@ export default function PriceChart({ data }: PriceChartProps) {
     ? data.reduce((total, item) => total + item.totalPrice, 0) / data.length
     : 0;
 
+  // Apply zoom level to chart height
+  const getChartHeight = () => {
+    const baseHeight = isMobile ? 300 : 400;
+    return baseHeight * zoomLevel;
+  };
+
+  const handleZoomIn = () => {
+    if (zoomLevel < 2) {
+      setZoomLevel(zoomLevel + 0.25);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (zoomLevel > 0.5) {
+      setZoomLevel(zoomLevel - 0.25);
+    }
+  };
+
   return (
     <Card className="glass-card">
       <CardHeader className="pb-2">
@@ -135,12 +157,32 @@ export default function PriceChart({ data }: PriceChartProps) {
             </Button>
           </div>
         </div>
-        <div className="text-sm text-muted-foreground mt-2">
-          Gemiddelde prijs: <span className="font-medium">{formatCurrency(averagePrice)}/kWh</span>
+        <div className="flex justify-between items-center">
+          <div className="text-sm text-muted-foreground mt-2">
+            Gemiddelde prijs: <span className="font-medium">{formatCurrency(averagePrice)}/kWh</span>
+          </div>
+          <div className="flex gap-1">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-8 w-8" 
+              onClick={handleZoomIn}
+            >
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-8 w-8" 
+              onClick={handleZoomOut}
+            >
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="chart-container">
+        <div ref={chartRef} className="chart-container" style={{ height: getChartHeight() + 'px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={filteredData}
@@ -148,10 +190,10 @@ export default function PriceChart({ data }: PriceChartProps) {
             >
               <defs>
                 <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#FF0000" stopOpacity={0.4} />
-                  <stop offset="33%" stopColor="#FFA500" stopOpacity={0.4} />
-                  <stop offset="66%" stopColor="#00CC00" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="#00CC00" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#FF0000" stopOpacity={0.6} />
+                  <stop offset="33%" stopColor="#FFA500" stopOpacity={0.6} />
+                  <stop offset="66%" stopColor="#00CC00" stopOpacity={0.6} />
+                  <stop offset="100%" stopColor="#00CC00" stopOpacity={0.1} />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} />
@@ -221,6 +263,13 @@ export default function PriceChart({ data }: PriceChartProps) {
                     />
                   );
                 }}
+              />
+              <Brush 
+                dataKey="from" 
+                height={30} 
+                stroke="#8884d8" 
+                tickFormatter={formatXAxis}
+                startIndex={Math.max(0, filteredData.length - 12)}
               />
             </AreaChart>
           </ResponsiveContainer>
