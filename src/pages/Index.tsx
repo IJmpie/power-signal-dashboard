@@ -53,13 +53,6 @@ const Index = () => {
     localStorage.setItem('priceThresholds', JSON.stringify({ high, medium }));
   };
 
-  // Helper function to get text color classes based on thresholds
-  const getTextColorClass = (level: 'high' | 'medium' | 'low') => {
-    if (level === 'high') return "text-traffic-red";
-    if (level === 'medium') return "text-traffic-yellow";
-    return "text-traffic-green";
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/50 dark:from-background dark:to-background pb-16">
       <header className="container flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-800">
@@ -119,15 +112,15 @@ const Index = () => {
                 <div className="flex flex-col space-y-2">
                   <div className="flex items-center">
                     <div className="w-4 h-4 rounded-full bg-traffic-red mr-2" />
-                    <span className={getTextColorClass('high')}>Hoog: &gt; €{thresholds.high.toFixed(2)}/kWh</span>
+                    <span>Hoog: &gt; €{thresholds.high.toFixed(2)}/kWh</span>
                   </div>
                   <div className="flex items-center">
                     <div className="w-4 h-4 rounded-full bg-traffic-yellow mr-2" />
-                    <span className={getTextColorClass('medium')}>Gemiddeld: €{thresholds.medium.toFixed(2)} - €{thresholds.high.toFixed(2)}/kWh</span>
+                    <span>Gemiddeld: €{thresholds.medium.toFixed(2)} - €{thresholds.high.toFixed(2)}/kWh</span>
                   </div>
                   <div className="flex items-center">
                     <div className="w-4 h-4 rounded-full bg-traffic-green mr-2" />
-                    <span className={getTextColorClass('low')}>Laag: &lt; €{thresholds.medium.toFixed(2)}/kWh</span>
+                    <span>Laag: &lt; €{thresholds.medium.toFixed(2)}/kWh</span>
                   </div>
                 </div>
               </div>
@@ -194,15 +187,15 @@ const Index = () => {
                   <div className="mt-4 flex flex-col space-y-4">
                     <div className="flex items-center">
                       <div className="w-4 h-4 rounded-full bg-traffic-red mr-2" />
-                      <span className={getTextColorClass('high')}>Hoog: &gt; €{thresholds.high.toFixed(2)}/kWh</span>
+                      <span>Hoog: &gt; €{thresholds.high.toFixed(2)}/kWh</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-4 h-4 rounded-full bg-traffic-yellow mr-2" />
-                      <span className={getTextColorClass('medium')}>Gemiddeld: €{thresholds.medium.toFixed(2)} - €{thresholds.high.toFixed(2)}/kWh</span>
+                      <span>Gemiddeld: €{thresholds.medium.toFixed(2)} - €{thresholds.high.toFixed(2)}/kWh</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-4 h-4 rounded-full bg-traffic-green mr-2" />
-                      <span className={getTextColorClass('low')}>Laag: &lt; €{thresholds.medium.toFixed(2)}/kWh</span>
+                      <span>Laag: &lt; €{thresholds.medium.toFixed(2)}/kWh</span>
                     </div>
                   </div>
                 </div>
