@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -14,19 +14,18 @@ import {
   ReferenceLine,
   Brush
 } from "recharts";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PriceData } from "@/services/priceService";
-import { ZoomIn, ZoomOut } from "lucide-react";
 
 type PriceChartProps = {
   data: PriceData[];
 };
 
 export default function PriceChart({ data }: PriceChartProps) {
-  const [zoomLevel, setZoomLevel] = useState<number>(1);
   const isMobile = useIsMobile();
   const chartRef = useRef<HTMLDivElement>(null);
+  const [brushStartIndex, setBrushStartIndex] = useState<number>(Math.max(0, data.length - 12));
+  const [brushEndIndex, setBrushEndIndex] = useState<number>(data.length - 1);
   
   const getPriceColor = (price: number) => {
     if (price >= 0.40) return "#FF0000"; // Brighter red
@@ -85,54 +84,35 @@ export default function PriceChart({ data }: PriceChartProps) {
     ? data.reduce((total, item) => total + item.totalPrice, 0) / data.length
     : 0;
 
-  // Apply zoom level to chart height
-  const getChartHeight = () => {
-    const baseHeight = isMobile ? 300 : 400;
-    return baseHeight * zoomLevel;
-  };
-
-  const handleZoomIn = () => {
-    if (zoomLevel < 2) {
-      setZoomLevel(zoomLevel + 0.25);
+  // Handle brush change to update the view
+  const handleBrushChange = (e: any) => {
+    if (e && e.startIndex !== undefined && e.endIndex !== undefined) {
+      setBrushStartIndex(e.startIndex);
+      setBrushEndIndex(e.endIndex);
     }
   };
 
-  const handleZoomOut = () => {
-    if (zoomLevel > 0.5) {
-      setZoomLevel(zoomLevel - 0.25);
+  // Initialize brush with a default timeframe
+  useEffect(() => {
+    if (data.length) {
+      // Default to showing the last 12 hours or less if fewer data points
+      setBrushStartIndex(Math.max(0, data.length - 12));
+      setBrushEndIndex(data.length - 1);
     }
-  };
+  }, [data.length]);
 
   return (
     <Card className="glass-card">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl">Prijsverloop</CardTitle>
-          <div className="flex gap-1">
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="h-8 w-8" 
-              onClick={handleZoomIn}
-            >
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="h-8 w-8" 
-              onClick={handleZoomOut}
-            >
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
         <div className="text-sm text-muted-foreground mt-2">
           Gemiddelde prijs: <span className="font-medium">{formatCurrency(averagePrice)}/kWh</span>
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={chartRef} className="chart-container" style={{ height: getChartHeight() + 'px' }}>
+        <div ref={chartRef} className="chart-container h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={data}
@@ -219,16 +199,9 @@ export default function PriceChart({ data }: PriceChartProps) {
                 height={30} 
                 stroke="#8884d8" 
                 tickFormatter={formatXAxis}
-                startIndex={Math.max(0, data.length - 12)}
-                onChange={(e) => {
-                  // Calculate zoom based on the brush selection
-                  if (e && e.startIndex !== undefined && e.endIndex !== undefined) {
-                    const range = e.endIndex - e.startIndex;
-                    const totalPoints = data.length;
-                    const zoomFactor = totalPoints / Math.max(range, 1);
-                    setZoomLevel(Math.min(Math.max(zoomFactor * 0.5, 0.5), 2));
-                  }
-                }}
+                startIndex={brushStartIndex}
+                endIndex={brushEndIndex}
+                onChange={handleBrushChange}
               />
             </AreaChart>
           </ResponsiveContainer>

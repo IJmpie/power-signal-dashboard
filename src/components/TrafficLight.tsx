@@ -50,8 +50,17 @@ export default function TrafficLight({
   customThresholds = { high: 0.40, medium: 0.25, low: 0.15 }
 }: TrafficLightProps) {
   type TrafficLightType = 'classic' | 'minimal' | 'digital' | 'emoji' | 'meter';
-  const [trafficLightType, setTrafficLightType] = useState<TrafficLightType>('classic');
-  const [soundEnabled, setSoundEnabled] = useState(false);
+  
+  // Load saved settings from localStorage
+  const [trafficLightType, setTrafficLightType] = useState<TrafficLightType>(() => {
+    const saved = localStorage.getItem('trafficLightType');
+    return (saved as TrafficLightType) || 'classic';
+  });
+  
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('trafficSoundEnabled') === 'true';
+  });
+  
   const [lastState, setLastState] = useState<'red' | 'yellow' | 'green' | null>(null);
 
   const isRed = currentPrice >= customThresholds.high;
@@ -74,6 +83,15 @@ export default function TrafficLight({
       case 'meter': return "Energie-meter stoplicht";
     }
   };
+
+  // Save settings to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('trafficLightType', trafficLightType);
+  }, [trafficLightType]);
+  
+  useEffect(() => {
+    localStorage.setItem('trafficSoundEnabled', soundEnabled.toString());
+  }, [soundEnabled]);
 
   // Play sound when traffic light state changes
   useEffect(() => {

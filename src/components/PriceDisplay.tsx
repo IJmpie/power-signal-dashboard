@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { fetchCurrentPriceOnly } from "@/services/priceApiService";
 import { toast } from "sonner";
 
@@ -12,8 +12,18 @@ type PriceDisplayProps = {
 };
 
 export default function PriceDisplay({ currentPrice, className }: PriceDisplayProps) {
-  const [directPrice, setDirectPrice] = useState<number | null>(null);
+  const [directPrice, setDirectPrice] = useState<number | null>(() => {
+    const savedPrice = localStorage.getItem('directPrice');
+    return savedPrice ? parseFloat(savedPrice) : null;
+  });
+  
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (directPrice !== null) {
+      localStorage.setItem('directPrice', directPrice.toString());
+    }
+  }, [directPrice]);
 
   const getPriceColor = () => {
     const priceToUse = directPrice !== null ? directPrice : currentPrice;

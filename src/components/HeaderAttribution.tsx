@@ -12,7 +12,7 @@ export default function HeaderAttribution({ className, compact = false }: Header
       <img 
         src="/lovable-uploads/b555600b-e096-4564-9504-2c1ae9139d38.png" 
         alt="Frank Energie" 
-        className={cn("object-contain", compact ? "h-6" : "h-8")}
+        className={cn("object-contain", compact ? "h-8" : "h-10")}
       />
       {!compact && (
         <span className="text-sm font-medium">Prijzen door Frank Energie</span>
