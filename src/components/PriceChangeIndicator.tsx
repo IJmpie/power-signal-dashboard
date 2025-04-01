@@ -7,9 +7,10 @@ type PriceChangeIndicatorProps = {
   data: PriceData[];
   currentPrice: number;
   className?: string;
+  showPercentage?: boolean;
 };
 
-export default function PriceChangeIndicator({ data, currentPrice, className }: PriceChangeIndicatorProps) {
+export default function PriceChangeIndicator({ data, currentPrice, className, showPercentage = false }: PriceChangeIndicatorProps) {
   if (data.length < 2) return null;
   
   // Calculate the average of the last 3 hours (if available)
@@ -74,7 +75,7 @@ export default function PriceChangeIndicator({ data, currentPrice, className }: 
     <div className={cn("flex items-center gap-1", className, getChangeColor())}>
       {getChangeIcon()}
       <span className="text-sm font-medium">{getChangeText()}</span>
-      {changeType !== "stable" && (
+      {(changeType !== "stable" || showPercentage) && (
         <span className="text-xs">
           ({percentChange > 0 ? "+" : ""}{formattedChange}%)
         </span>
