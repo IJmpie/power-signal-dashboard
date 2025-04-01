@@ -1,4 +1,3 @@
-
 export type PriceData = {
   from: string;
   till: string;
@@ -54,6 +53,36 @@ export async function getPriceData(date: string = getCurrentDate()): Promise<Pri
   } catch (error) {
     console.error("Failed to fetch price data:", error);
     return generateMockPriceData(); // In case of error, return mock data
+  }
+}
+
+/**
+ * Get only the current electricity price
+ * This is a simpler function that returns just the current price
+ * No API key required
+ */
+export async function getCurrentPriceOnly(): Promise<number> {
+  try {
+    const data = await getPriceData();
+    
+    // Find the current price for the current time slot
+    const now = new Date();
+    const currentPricePoint = data.find(price => 
+      new Date(price.from) <= now && new Date(price.till) > now
+    );
+    
+    if (currentPricePoint) {
+      return currentPricePoint.totalPrice;
+    } else if (data.length > 0) {
+      // If no exact match, use the latest price
+      return data[data.length - 1].totalPrice;
+    }
+    
+    // Fallback to a default price if no data is available
+    return 0.25; // Default mid-range price
+  } catch (error) {
+    console.error("Failed to get current price:", error);
+    return 0.25; // Default mid-range price as fallback
   }
 }
 

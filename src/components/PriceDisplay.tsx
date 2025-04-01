@@ -1,5 +1,10 @@
 
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { fetchCurrentPriceOnly } from "@/services/priceApiService";
+import { toast } from "sonner";
 
 type PriceDisplayProps = {
   currentPrice: number;
@@ -7,14 +12,33 @@ type PriceDisplayProps = {
 };
 
 export default function PriceDisplay({ currentPrice, className }: PriceDisplayProps) {
+  const [directPrice, setDirectPrice] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const getPriceColor = () => {
-    if (currentPrice >= 0.40) return "text-traffic-red";
-    if (currentPrice >= 0.25) return "text-traffic-yellow";
+    const priceToUse = directPrice !== null ? directPrice : currentPrice;
+    
+    if (priceToUse >= 0.40) return "text-traffic-red";
+    if (priceToUse >= 0.25) return "text-traffic-yellow";
     return "text-traffic-green";
   };
 
+  // Function to fetch price directly using our API
+  const fetchDirectPrice = async () => {
+    setLoading(true);
+    try {
+      const result = await fetchCurrentPriceOnly();
+      if (result) {
+        setDirectPrice(result.currentPrice);
+        toast.success("Prijs direct opgehaald");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Fix Euro symbol display by directly using the € character with proper spacing
-  const formattedPrice = `€${currentPrice.toFixed(2)}`;
+  const formattedPrice = `€${(directPrice !== null ? directPrice : currentPrice).toFixed(2)}`;
 
   return (
     <div className={cn("flex flex-col items-center", className)}>
@@ -30,6 +54,18 @@ export default function PriceDisplay({ currentPrice, className }: PriceDisplayPr
       <div className="text-xs text-muted-foreground mt-1">
         Inclusief belastingen en netbeheerkosten
       </div>
+      
+      {/* Button to test direct API call */}
+      <Button 
+        variant="outline"
+        size="sm"
+        className="mt-3"
+        onClick={fetchDirectPrice}
+        disabled={loading}
+      >
+        <RefreshCw className={cn("h-3 w-3 mr-2", loading && "animate-spin")} />
+        Direct prijzen ophalen
+      </Button>
     </div>
   );
 }
