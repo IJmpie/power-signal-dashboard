@@ -10,7 +10,7 @@ type PriceChangeIndicatorProps = {
   showPercentage?: boolean;
 };
 
-export default function PriceChangeIndicator({ data, currentPrice, className, showPercentage = false }: PriceChangeIndicatorProps) {
+export default function PriceChangeIndicator({ data, currentPrice, className, showPercentage = true }: PriceChangeIndicatorProps) {
   if (data.length < 2) return null;
   
   // Calculate the average of the last 3 hours (if available)

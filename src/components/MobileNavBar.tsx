@@ -1,5 +1,4 @@
-
-import { BarChart2, Settings, Bell, Zap } from "lucide-react";
+import { BarChart2, Settings, Bell, TrafficCone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -15,7 +14,7 @@ export default function MobileNavBar() {
       <div className="flex items-center justify-around p-3">
         <NavItem 
           href="/" 
-          icon={<Zap size={20} />} 
+          icon={<TrafficCone size={20} />} 
           label="Stoplicht" 
           active={location.pathname === "/"}
         />
@@ -33,7 +32,11 @@ export default function MobileNavBar() {
         />
         <NavItem 
           href="/frankenergie" 
-          icon={<Zap size={20} />} 
+          icon={<img 
+            src="/lovable-uploads/b555600b-e096-4564-9504-2c1ae9139d38.png" 
+            alt="Frank" 
+            className="w-5 h-5 object-contain"
+          />} 
           label="Frank" 
           active={location.pathname === "/frankenergie"}
         />
