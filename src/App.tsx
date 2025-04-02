@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MobileNavBar from "./components/MobileNavBar";
@@ -22,6 +22,8 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import WelcomePage from "./pages/WelcomePage";
+import GuestLayout from "./components/GuestLayout";
 
 // Get the Clerk publishable key from environment variables
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -48,34 +50,78 @@ const AppContent = () => {
 
   return (
     <>
-      {!isMobile && <DesktopNavBar />}
       <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/prices" element={<PricesPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/frankenergie" element={<FrankEnergiePage />} />
-        <Route path="/esp32" element={<ESP32DashboardPage />} />
+        {/* Welkom pagina als startpunt */}
+        <Route path="/welkom" element={<WelcomePage />} />
         
-        {/* Authentication routes */}
+        {/* Route voor gastgebruikers */}
+        <Route path="/gast" element={<GuestLayout />}>
+          <Route index element={<Navigate to="/" replace />} />
+          <Route path="/" element={<Index />} />
+          <Route path="/prices" element={<PricesPage />} />
+        </Route>
+        
+        {/* Beschermde routes die authenticatie vereisen */}
+        <Route path="/" element={
+          <>
+            {!isMobile && <DesktopNavBar />}
+            <Outlet />
+            {isMobile && <MobileNavBar />}
+          </>
+        }>
+          <Route index element={
+            isDevelopment && !PUBLISHABLE_KEY 
+              ? <Index /> 
+              : <ProtectedRoute><Index /></ProtectedRoute>
+          } />
+          <Route path="/prices" element={
+            isDevelopment && !PUBLISHABLE_KEY 
+              ? <PricesPage /> 
+              : <ProtectedRoute><PricesPage /></ProtectedRoute>
+          } />
+          <Route path="/notifications" element={
+            isDevelopment && !PUBLISHABLE_KEY 
+              ? <NotificationsPage /> 
+              : <ProtectedRoute><NotificationsPage /></ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            isDevelopment && !PUBLISHABLE_KEY 
+              ? <SettingsPage /> 
+              : <ProtectedRoute><SettingsPage /></ProtectedRoute>
+          } />
+          <Route path="/frankenergie" element={
+            isDevelopment && !PUBLISHABLE_KEY 
+              ? <FrankEnergiePage /> 
+              : <ProtectedRoute><FrankEnergiePage /></ProtectedRoute>
+          } />
+          <Route path="/esp32" element={
+            isDevelopment && !PUBLISHABLE_KEY 
+              ? <ESP32DashboardPage /> 
+              : <ProtectedRoute><ESP32DashboardPage /></ProtectedRoute>
+          } />
+          <Route path="/profiel" element={
+            isDevelopment && !PUBLISHABLE_KEY 
+              ? <ProfilePage /> 
+              : <ProtectedRoute><ProfilePage /></ProtectedRoute>
+          } />
+        </Route>
+        
+        {/* Authenticatie routes */}
         <Route path="/inloggen" element={<SignInPage />} />
         <Route path="/registreren" element={<SignUpPage />} />
         <Route path="/wachtwoord-vergeten" element={<ForgotPasswordPage />} />
         <Route path="/wachtwoord-resetten" element={<ResetPasswordPage />} />
+        
+        {/* Algemene pagina's */}
         <Route path="/voorwaarden" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         
-        {/* Protected routes */}
-        <Route path="/profiel" element={
-          isDevelopment && !PUBLISHABLE_KEY 
-            ? <ProfilePage /> 
-            : <ProtectedRoute><ProfilePage /></ProtectedRoute>
-        } />
+        {/* Redirect root naar welkom */}
+        <Route path="/" element={<Navigate to="/welkom" replace />} />
         
         {/* Catch-all route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {isMobile && <MobileNavBar />}
     </>
   );
 };
@@ -111,7 +157,7 @@ const App = () => {
       signUpUrl="/registreren"
       signInFallbackRedirectUrl="/"
       signUpFallbackRedirectUrl="/"
-      afterSignOutUrl="/"
+      afterSignOutUrl="/welkom"
     >
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>

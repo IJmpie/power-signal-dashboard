@@ -1,10 +1,14 @@
 
-import { BarChart2, Settings, Bell, TrafficCone } from "lucide-react";
+import { BarChart2, Settings, Bell, TrafficCone, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export default function MobileNavBar() {
+interface MobileNavBarProps {
+  guestMode?: boolean;
+}
+
+export default function MobileNavBar({ guestMode = false }: MobileNavBarProps) {
   const isMobile = useIsMobile();
   const location = useLocation();
   
@@ -25,28 +29,39 @@ export default function MobileNavBar() {
           label="Prijzen" 
           active={location.pathname === "/prices"}
         />
-        <NavItem 
-          href="/notifications" 
-          icon={<Bell size={20} />} 
-          label="Meldingen" 
-          active={location.pathname === "/notifications"}
-        />
-        <NavItem 
-          href="/frankenergie" 
-          icon={<img 
-            src="/lovable-uploads/b555600b-e096-4564-9504-2c1ae9139d38.png" 
-            alt="Frank" 
-            className="w-5 h-5 object-contain grayscale"
-          />} 
-          label="Frank" 
-          active={location.pathname === "/frankenergie"}
-        />
-        <NavItem 
-          href="/settings" 
-          icon={<Settings size={20} />} 
-          label="Instellingen" 
-          active={location.pathname === "/settings"}
-        />
+        {!guestMode ? (
+          <>
+            <NavItem 
+              href="/notifications" 
+              icon={<Bell size={20} />} 
+              label="Meldingen" 
+              active={location.pathname === "/notifications"}
+            />
+            <NavItem 
+              href="/frankenergie" 
+              icon={<img 
+                src="/lovable-uploads/b555600b-e096-4564-9504-2c1ae9139d38.png" 
+                alt="Frank" 
+                className="w-5 h-5 object-contain grayscale"
+              />} 
+              label="Frank" 
+              active={location.pathname === "/frankenergie"}
+            />
+            <NavItem 
+              href="/settings" 
+              icon={<Settings size={20} />} 
+              label="Instellingen" 
+              active={location.pathname === "/settings"}
+            />
+          </>
+        ) : (
+          <NavItem 
+            href="/welkom" 
+            icon={<LogIn size={20} />} 
+            label="Inloggen" 
+            active={false}
+          />
+        )}
       </div>
     </div>
   );

@@ -28,8 +28,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
 
     if (!isSignedIn) {
-      // Redirect to login if not signed in, and remember where they were trying to go
-      return <Navigate to="/inloggen" state={{ from: location.pathname }} replace />;
+      // Redirect to welcome page if not signed in
+      return <Navigate to="/welkom" state={{ from: location.pathname }} replace />;
     }
 
     return <>{children}</>;
