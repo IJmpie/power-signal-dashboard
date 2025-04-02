@@ -1,28 +1,27 @@
 
 import { useState } from "react";
 import { useClerk } from "@clerk/clerk-react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ResetPasswordPage() {
   const { client } = useClerk();
   const navigate = useNavigate();
-  const [verificationCode, setVerificationCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
-  // Extract email from URL parameters
-  const urlParams = new URLSearchParams(window.location.search);
-  const email = urlParams.get("email") || "";
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Extract token from URL query parameters
+  const searchParams = new URLSearchParams(window.location.search);
+  const token = searchParams.get("token") || "";
 
   const validatePassword = (password: string) => {
     // Minimaal 8 tekens, ten minste één hoofdletter, één cijfer en één speciaal teken
@@ -32,7 +31,6 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
 
     if (password !== confirmPassword) {
       setError("De wachtwoorden komen niet overeen");
@@ -45,28 +43,24 @@ export default function ResetPasswordPage() {
     }
 
     setIsLoading(true);
+    setError("");
 
     try {
-      const result = await client.signIn.attemptFirstFactor({
+      // Use reset_password_email_code instead of email_code
+      await client.signIn.attemptFirstFactor({
         strategy: "reset_password_email_code",
-        code: verificationCode,
         password,
-        identifier: email,
+        code: token,
       });
 
-      if (result.status === "complete") {
-        toast.success("Wachtwoord succesvol gewijzigd!");
-        navigate("/inloggen");
-      } else {
-        console.error("Reset status:", result);
-        setError("Er is een fout opgetreden bij het resetten van je wachtwoord.");
-      }
+      toast.success("Wachtwoord is succesvol gereset!");
+      navigate("/inloggen");
     } catch (err: any) {
       console.error("Wachtwoord reset error:", err);
       if (err.errors && err.errors.length > 0) {
-        setError(err.errors[0].message || "De verificatiecode is ongeldig of verlopen.");
+        setError(err.errors[0].message || "Er is een fout opgetreden bij het resetten van je wachtwoord.");
       } else {
-        setError("De verificatiecode is ongeldig of verlopen.");
+        setError("Er is een fout opgetreden bij het resetten van je wachtwoord. De link is mogelijk verlopen.");
       }
     } finally {
       setIsLoading(false);
@@ -77,10 +71,8 @@ export default function ResetPasswordPage() {
     <div className="container flex items-center justify-center min-h-[85vh] py-8">
       <div className="w-full max-w-md space-y-8 p-8 border rounded-lg shadow-md bg-card">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Reset je wachtwoord</h1>
-          <p className="text-muted-foreground mt-2">
-            Voer je verificatiecode en nieuwe wachtwoord in
-          </p>
+          <h1 className="text-2xl font-bold">Wachtwoord resetten</h1>
+          <p className="text-muted-foreground mt-2">Stel een nieuw wachtwoord in voor je account</p>
         </div>
 
         {error && (
@@ -91,28 +83,6 @@ export default function ResetPasswordPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email">E-mailadres</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              disabled
-              className="bg-muted"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="code">Verificatiecode</Label>
-            <Input
-              id="code"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-              placeholder="Voer de code in uit je e-mail"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="password">Nieuw wachtwoord</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -121,7 +91,7 @@ export default function ResetPasswordPage() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-10"
+                className="pl-10"
                 placeholder="••••••••"
                 required
               />
@@ -130,7 +100,7 @@ export default function ResetPasswordPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? "Verbergen" : "Tonen"}
               </button>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -139,7 +109,7 @@ export default function ResetPasswordPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Bevestig nieuw wachtwoord</Label>
+            <Label htmlFor="confirmPassword">Bevestig wachtwoord</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
@@ -147,7 +117,7 @@ export default function ResetPasswordPage() {
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="pl-10 pr-10"
+                className="pl-10"
                 placeholder="••••••••"
                 required
               />
@@ -156,7 +126,7 @@ export default function ResetPasswordPage() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showConfirmPassword ? "Verbergen" : "Tonen"}
               </button>
             </div>
           </div>
@@ -166,17 +136,8 @@ export default function ResetPasswordPage() {
             className="w-full"
             disabled={isLoading}
           >
-            {isLoading ? "Bezig met resetten..." : "Reset wachtwoord"}
+            {isLoading ? "Bezig met resetten..." : "Wachtwoord resetten"}
           </Button>
-
-          <div className="text-center text-sm">
-            <p>
-              Herinner je je wachtwoord?{" "}
-              <Link to="/inloggen" className="text-primary hover:underline font-medium">
-                Inloggen
-              </Link>
-            </p>
-          </div>
         </form>
       </div>
     </div>

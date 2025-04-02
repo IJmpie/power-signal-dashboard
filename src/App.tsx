@@ -25,7 +25,9 @@ import TermsPage from "./pages/TermsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Get the Clerk publishable key from environment variables
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+// Add a mock value for development to prevent errors
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
+  (import.meta.env.DEV ? "pk_test_placeholder-key-for-development" : undefined);
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Clerk publishable key. Ensure VITE_CLERK_PUBLISHABLE_KEY is set.");
