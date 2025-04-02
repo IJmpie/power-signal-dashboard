@@ -12,6 +12,7 @@ import PricesPage from "./pages/PricesPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
 import FrankEnergiePage from "./pages/FrankEnergiePage";
+import ESP32DashboardPage from "./pages/ESP32DashboardPage";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const AppContent = () => {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/frankenergie" element={<FrankEnergiePage />} />
+        <Route path="/esp32" element={<ESP32DashboardPage />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

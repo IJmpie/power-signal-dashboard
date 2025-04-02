@@ -1,3 +1,4 @@
+
 import { BarChart2, Settings, Bell, TrafficCone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
@@ -35,7 +36,7 @@ export default function MobileNavBar() {
           icon={<img 
             src="/lovable-uploads/b555600b-e096-4564-9504-2c1ae9139d38.png" 
             alt="Frank" 
-            className="w-5 h-5 object-contain"
+            className="w-5 h-5 object-contain grayscale"
           />} 
           label="Frank" 
           active={location.pathname === "/frankenergie"}

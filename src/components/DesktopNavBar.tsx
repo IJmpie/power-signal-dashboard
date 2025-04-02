@@ -1,91 +1,66 @@
 
-import { BarChart2, Settings, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { BarChart2, Settings, Bell, TrafficCone } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function DesktopNavBar() {
+  const isMobile = useIsMobile();
   const location = useLocation();
   
+  if (isMobile) return null;
+  
   return (
-    <div className="border-b border-gray-200 dark:border-gray-800 bg-background">
-      <div className="container flex items-center justify-end p-2 gap-4">
-        <NavItem 
-          href="/" 
-          icon={<StoplichtIcon size={20} />} 
-          label="Stoplicht" 
-          active={location.pathname === "/"}
-        />
-        <NavItem 
-          href="/prices" 
-          icon={<BarChart2 size={20} />} 
-          label="Prijzen" 
-          active={location.pathname === "/prices"}
-        />
-        <NavItem 
-          href="/notifications" 
-          icon={<Bell size={20} />} 
-          label="Meldingen" 
-          active={location.pathname === "/notifications"}
-        />
-        <NavItem 
-          href="/frankenergie" 
-          icon={<FrankIcon size={20} />} 
-          label="Frank" 
-          active={location.pathname === "/frankenergie"}
-        />
-        <NavItem 
-          href="/settings" 
-          icon={<Settings size={20} />} 
-          label="Instellingen" 
-          active={location.pathname === "/settings"}
-        />
+    <div className="fixed top-0 left-0 right-0 border-b border-gray-200 dark:border-gray-800 bg-background z-50 h-14">
+      <div className="container flex items-center justify-between h-full">
+        <div className="flex items-center gap-4">
+          <NavItem 
+            href="/" 
+            icon={<TrafficCone size={20} />} 
+            label="Stoplicht" 
+            active={location.pathname === "/"} 
+          />
+          <NavItem 
+            href="/prices" 
+            icon={<BarChart2 size={20} />} 
+            label="Prijzen" 
+            active={location.pathname === "/prices"} 
+          />
+          <NavItem 
+            href="/notifications" 
+            icon={<Bell size={20} />} 
+            label="Meldingen" 
+            active={location.pathname === "/notifications"} 
+          />
+          <NavItem 
+            href="/esp32" 
+            icon={<TrafficCone size={20} />} 
+            label="ESP32 Dashboard" 
+            active={location.pathname === "/esp32"} 
+          />
+        </div>
+        <div className="flex items-center gap-4">
+          <NavItem 
+            href="/frankenergie" 
+            icon={<img 
+              src="/lovable-uploads/b555600b-e096-4564-9504-2c1ae9139d38.png" 
+              alt="Frank" 
+              className="w-5 h-5 object-contain grayscale" 
+            />} 
+            label="Frank" 
+            active={location.pathname === "/frankenergie"} 
+          />
+          <NavItem 
+            href="/settings" 
+            icon={<Settings size={20} />} 
+            label="Instellingen" 
+            active={location.pathname === "/settings"} 
+          />
+          <ThemeToggle />
+        </div>
       </div>
     </div>
-  );
-}
-
-// Custom StoplichtIcon component
-function StoplichtIcon({ size = 24, ...props }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size}
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-      {...props}
-    >
-      <rect x="6" y="3" width="12" height="18" rx="6" strokeWidth="2" />
-      <circle cx="12" cy="7" r="2" fill="currentColor" />
-      <circle cx="12" cy="12" r="2" fill="currentColor" />
-      <circle cx="12" cy="17" r="2" fill="currentColor" />
-    </svg>
-  );
-}
-
-// Custom Frank Icon component
-function FrankIcon({ size = 24, ...props }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M9 8h7m-7 4h5" />
-      <path d="M6 18v-8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8" />
-      <path d="M6 12a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2" />
-    </svg>
   );
 }
 
@@ -101,12 +76,12 @@ function NavItem({ href, icon, label, active }: NavItemProps) {
     <Link
       to={href}
       className={cn(
-        "flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent",
-        active ? "text-primary font-medium" : "text-muted-foreground"
+        "flex items-center gap-2 px-3 py-2 rounded-md transition-colors",
+        active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
       )}
     >
       <div className="flex items-center justify-center">{icon}</div>
-      <span>{label}</span>
+      <span className="text-sm font-medium">{label}</span>
     </Link>
   );
 }
