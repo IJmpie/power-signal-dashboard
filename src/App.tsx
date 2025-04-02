@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ClerkProvider } from "@clerk/clerk-react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MobileNavBar from "./components/MobileNavBar";
@@ -25,16 +24,25 @@ import TermsPage from "./pages/TermsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Get the Clerk publishable key from environment variables
-// Add a mock value for development to prevent errors
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
-  (import.meta.env.DEV ? "pk_test_placeholder-key-for-development" : undefined);
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const isDevelopment = import.meta.env.DEV;
 
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Clerk publishable key. Ensure VITE_CLERK_PUBLISHABLE_KEY is set.");
-}
-
+// Create a new query client for React Query
 const queryClient = new QueryClient();
 
+// Conditionally import ClerkProvider to avoid errors in development mode
+let ClerkProvider;
+try {
+  // Dynamic import to allow app to continue loading if Clerk is not properly configured
+  ClerkProvider = isDevelopment && !PUBLISHABLE_KEY 
+    ? ({ children }) => <>{children}</> 
+    : require("@clerk/clerk-react").ClerkProvider;
+} catch (e) {
+  console.warn("Clerk provider not available, falling back to regular rendering");
+  ClerkProvider = ({ children }) => <>{children}</>;
+}
+
+// Component for app content that doesn't depend on Clerk
 const AppContent = () => {
   const isMobile = useIsMobile();
 
@@ -58,9 +66,13 @@ const AppContent = () => {
         <Route path="/privacy" element={<PrivacyPage />} />
         
         {/* Protected routes */}
-        <Route path="/profiel" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/profiel" element={
+          isDevelopment && !PUBLISHABLE_KEY 
+            ? <ProfilePage /> 
+            : <ProtectedRoute><ProfilePage /></ProtectedRoute>
+        } />
         
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        {/* Catch-all route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
       {isMobile && <MobileNavBar />}
@@ -68,26 +80,50 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <ClerkProvider
-    publishableKey={PUBLISHABLE_KEY}
-    clerkJSVersion="5.56.0-snapshot.v20250312225817"
-    signInUrl="/inloggen"
-    signUpUrl="/registreren"
-    signInFallbackRedirectUrl="/"
-    signUpFallbackRedirectUrl="/"
-    afterSignOutUrl="/"
-  >
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ClerkProvider>
-);
+// Main App component
+const App = () => {
+  // If in development and no key is provided, render without Clerk
+  if (isDevelopment && !PUBLISHABLE_KEY) {
+    console.warn(
+      "No Clerk publishable key found. Running in development mode without authentication. " +
+      "To enable authentication features, set VITE_CLERK_PUBLISHABLE_KEY in your environment."
+    );
+    
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  // Regular rendering with Clerk when key is available
+  return (
+    <ClerkProvider
+      publishableKey={PUBLISHABLE_KEY}
+      clerkJSVersion="5.56.0-snapshot.v20250312225817"
+      signInUrl="/inloggen"
+      signUpUrl="/registreren"
+      signInFallbackRedirectUrl="/"
+      signUpFallbackRedirectUrl="/"
+      afterSignOutUrl="/"
+    >
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
+  );
+};
 
 export default App;
