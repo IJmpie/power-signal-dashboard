@@ -20,16 +20,16 @@ export default function DesktopNavBar({ guestMode = false }: DesktopNavBarProps)
       <div className="container flex items-center justify-between h-full">
         <div className="flex items-center gap-4">
           <NavItem 
-            href="/" 
+            href={guestMode ? "/gast" : "/"} 
             icon={<TrafficCone size={20} />} 
             label="Stoplicht" 
-            active={location.pathname === "/"} 
+            active={location.pathname === (guestMode ? "/gast" : "/")} 
           />
           <NavItem 
-            href="/prices" 
+            href={guestMode ? "/gast/prices" : "/prices"} 
             icon={<BarChart2 size={20} />} 
             label="Prijzen" 
-            active={location.pathname === "/prices"} 
+            active={location.pathname === (guestMode ? "/gast/prices" : "/prices")} 
           />
           {!guestMode && (
             <>

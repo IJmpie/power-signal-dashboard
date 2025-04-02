@@ -14,8 +14,8 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
   const isMobile = useIsMobile();
   
   // Als de route niet toegestaan is voor gasten, doorverwijzen naar de welkomstpagina
-  const allowedRoutes = ["/", "/prices", "/gast"];
-  if (!allowedRoutes.includes(location.pathname) && location.pathname !== "/gast") {
+  const allowedRoutes = ["/gast", "/gast/prices"];
+  if (!allowedRoutes.includes(location.pathname) && !location.pathname.startsWith("/gast")) {
     return <Navigate to="/welkom" replace />;
   }
 

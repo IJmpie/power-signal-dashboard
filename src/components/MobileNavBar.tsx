@@ -18,16 +18,16 @@ export default function MobileNavBar({ guestMode = false }: MobileNavBarProps) {
     <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-800 bg-background z-50">
       <div className="flex items-center justify-around p-3">
         <NavItem 
-          href="/" 
+          href={guestMode ? "/gast" : "/"} 
           icon={<TrafficCone size={20} />} 
           label="Stoplicht" 
-          active={location.pathname === "/"}
+          active={location.pathname === (guestMode ? "/gast" : "/")}
         />
         <NavItem 
-          href="/prices" 
+          href={guestMode ? "/gast/prices" : "/prices"} 
           icon={<BarChart2 size={20} />} 
           label="Prijzen" 
-          active={location.pathname === "/prices"}
+          active={location.pathname === (guestMode ? "/gast/prices" : "/prices")}
         />
         {!guestMode ? (
           <>

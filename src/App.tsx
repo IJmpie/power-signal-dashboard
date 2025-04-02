@@ -56,9 +56,8 @@ const AppContent = () => {
         
         {/* Route voor gastgebruikers */}
         <Route path="/gast" element={<GuestLayout />}>
-          <Route index element={<Navigate to="/" replace />} />
-          <Route path="/" element={<Index />} />
-          <Route path="/prices" element={<PricesPage />} />
+          <Route index element={<Index />} />
+          <Route path="prices" element={<PricesPage />} />
         </Route>
         
         {/* Beschermde routes die authenticatie vereisen */}
