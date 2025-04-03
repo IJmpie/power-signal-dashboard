@@ -1,14 +1,10 @@
 
-import { BarChart2, Settings, Bell, TrafficCone, LogIn } from "lucide-react";
+import { BarChart2, Settings, Bell, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-interface MobileNavBarProps {
-  guestMode?: boolean;
-}
-
-export default function MobileNavBar({ guestMode = false }: MobileNavBarProps) {
+export default function MobileNavBar() {
   const isMobile = useIsMobile();
   const location = useLocation();
   
@@ -18,50 +14,35 @@ export default function MobileNavBar({ guestMode = false }: MobileNavBarProps) {
     <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-800 bg-background z-50">
       <div className="flex items-center justify-around p-3">
         <NavItem 
-          href={guestMode ? "/gast" : "/"} 
-          icon={<TrafficCone size={20} />} 
+          href="/" 
+          icon={<Zap size={20} />} 
           label="Stoplicht" 
-          active={location.pathname === (guestMode ? "/gast" : "/")}
+          active={location.pathname === "/"}
         />
         <NavItem 
-          href={guestMode ? "/gast/prices" : "/prices"} 
+          href="/prices" 
           icon={<BarChart2 size={20} />} 
           label="Prijzen" 
-          active={location.pathname === (guestMode ? "/gast/prices" : "/prices")}
+          active={location.pathname === "/prices"}
         />
-        {!guestMode ? (
-          <>
-            <NavItem 
-              href="/notifications" 
-              icon={<Bell size={20} />} 
-              label="Meldingen" 
-              active={location.pathname === "/notifications"}
-            />
-            <NavItem 
-              href="/frankenergie" 
-              icon={<img 
-                src="/lovable-uploads/b555600b-e096-4564-9504-2c1ae9139d38.png" 
-                alt="Frank" 
-                className="w-5 h-5 object-contain grayscale"
-              />} 
-              label="Frank" 
-              active={location.pathname === "/frankenergie"}
-            />
-            <NavItem 
-              href="/settings" 
-              icon={<Settings size={20} />} 
-              label="Instellingen" 
-              active={location.pathname === "/settings"}
-            />
-          </>
-        ) : (
-          <NavItem 
-            href="/welkom" 
-            icon={<LogIn size={20} />} 
-            label="Inloggen" 
-            active={false}
-          />
-        )}
+        <NavItem 
+          href="/notifications" 
+          icon={<Bell size={20} />} 
+          label="Meldingen" 
+          active={location.pathname === "/notifications"}
+        />
+        <NavItem 
+          href="/frankenergie" 
+          icon={<Zap size={20} />} 
+          label="Frank" 
+          active={location.pathname === "/frankenergie"}
+        />
+        <NavItem 
+          href="/settings" 
+          icon={<Settings size={20} />} 
+          label="Instellingen" 
+          active={location.pathname === "/settings"}
+        />
       </div>
     </div>
   );

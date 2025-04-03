@@ -9,6 +9,7 @@ export default function SourceAttribution() {
     <Card className="glass-card w-full overflow-hidden">
       <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
         <div className={cn("flex flex-col flex-1")}>
+          <p className="text-lg font-bold text-foreground mb-2">Stroomprijzen worden geleverd door:</p>
           <div className="border-l-4 border-primary pl-4 py-2 my-3">
             <h3 className="text-xl font-bold text-primary mb-3">Word klant bij Frank Energie!</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
@@ -37,7 +38,7 @@ export default function SourceAttribution() {
           <img 
             src="/lovable-uploads/b555600b-e096-4564-9504-2c1ae9139d38.png" 
             alt="Frank Energie" 
-            className="h-20 object-contain grayscale"
+            className="h-20 object-contain"
           />
         </div>
       </CardContent>

@@ -14,8 +14,7 @@ export function formatCurrency(value: number) {
 export function formatDateToTime(date: Date): string {
   return date.toLocaleTimeString('nl-NL', { 
     hour: '2-digit', 
-    minute: '2-digit',
-    timeZone: 'Europe/Amsterdam' // Explicitly set timezone to Amsterdam for proper DST handling
+    minute: '2-digit'
   });
 }
 
@@ -25,7 +24,6 @@ export function formatFullDate(date: Date): string {
     month: 'long', 
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Europe/Amsterdam' // Explicitly set timezone to Amsterdam for proper DST handling
+    minute: '2-digit'
   });
 }
