@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ThemeToggle from "@/components/ThemeToggle";
 import PriceThresholdSettings from "@/components/PriceThresholdSettings";
-import SourceAttribution from "@/components/SourceAttribution";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,8 +55,6 @@ export default function SettingsPage() {
               initialMediumThreshold={thresholds.medium}
               onThresholdsChange={handleThresholdsChange}
             />
-
-            <SourceAttribution />
           </div>
         </main>
       </ScrollArea>

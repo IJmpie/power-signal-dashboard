@@ -58,7 +58,7 @@ const Index = () => {
 
       <main className="container pb-6 mt-4">
         <div className={isMobile ? "space-y-4" : "grid grid-cols-1 lg:grid-cols-12 gap-6"}>
-          {/* Traffic Light and Legend */}
+          {/* Traffic Light Section */}
           <div className={isMobile ? "" : "lg:col-span-5 space-y-6"}>
             <Card className="glass-card p-6 flex flex-col items-center">
               {isLoading ? (
@@ -99,8 +99,19 @@ const Index = () => {
                 </Button>
               </div>
             </Card>
+          </div>
 
-            <Card className="glass-card p-6">
+          {/* Best Price Recommendation */}
+          <div className={isMobile ? "" : "lg:col-span-7"}>
+            {!isLoading && (
+              <BestPriceRecommendation 
+                data={priceData} 
+                customThresholds={thresholds}
+              />
+            )}
+            
+            {/* Legend - Moved below BestPriceRecommendation */}
+            <Card className="glass-card p-6 mt-4">
               <div className="text-center">
                 <h2 className="text-lg font-medium">Legenda</h2>
                 <div className="mt-4 flex flex-col space-y-4">
@@ -119,16 +130,6 @@ const Index = () => {
                 </div>
               </div>
             </Card>
-          </div>
-
-          {/* Best Price Recommendation */}
-          <div className={isMobile ? "" : "lg:col-span-7"}>
-            {!isLoading && (
-              <BestPriceRecommendation 
-                data={priceData} 
-                customThresholds={thresholds}
-              />
-            )}
           </div>
         </div>
       </main>

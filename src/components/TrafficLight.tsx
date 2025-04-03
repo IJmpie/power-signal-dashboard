@@ -1,9 +1,7 @@
-
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 type TrafficLightProps = {
   currentPrice: number;
@@ -269,7 +267,25 @@ export default function TrafficLight({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex justify-center gap-2 mb-4">
+      {/* Display traffic light name first */}
+      <div className="text-center text-sm mb-3">
+        {getTrafficLightName(trafficLightType)}
+      </div>
+      
+      {/* Traffic light display */}
+      <div className={cn("mb-4", className)}>
+        {renderTrafficLight()}
+      </div>
+      
+      {/* Legend with dynamic color */}
+      <div className="mb-4 text-center">
+        <div className={cn("text-lg font-medium", getLegendColor())}>
+          {isRed ? "Hoge Prijs" : isYellow ? "Gemiddelde Prijs" : "Lage Prijs"}
+        </div>
+      </div>
+      
+      {/* Controls moved below traffic light */}
+      <div className="flex justify-center gap-2 mt-4">
         <Button 
           variant="outline" 
           size="icon" 
@@ -294,21 +310,6 @@ export default function TrafficLight({
         >
           <ArrowRight className="h-4 w-4" />
         </Button>
-      </div>
-      
-      <div className="text-center text-sm mb-3">
-        {getTrafficLightName(trafficLightType)}
-      </div>
-      
-      <div className={cn("mb-4", className)}>
-        {renderTrafficLight()}
-      </div>
-      
-      {/* Legend with dynamic color - with additional spacing from traffic light */}
-      <div className="mt-4 text-center">
-        <div className={cn("text-lg font-medium", getLegendColor())}>
-          {isRed ? "Hoge Prijs" : isYellow ? "Gemiddelde Prijs" : "Lage Prijs"}
-        </div>
       </div>
     </div>
   );
