@@ -31,6 +31,10 @@ const Index = () => {
     }
   }, [error]);
 
+  useEffect(() => {
+    document.title = "Stroomprijs Stoplicht";
+  }, []);
+
   const handleRefresh = () => {
     toast.promise(
       async () => {
@@ -56,10 +60,10 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="container pb-6 mt-4">
-        <div className={isMobile ? "space-y-4" : "grid grid-cols-1 lg:grid-cols-12 gap-6"}>
+      <main className="container py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Traffic Light and Legend */}
-          <div className={isMobile ? "" : "lg:col-span-5 space-y-6"}>
+          <div className="lg:col-span-5 space-y-6">
             <Card className="glass-card p-6 flex flex-col items-center">
               {isLoading ? (
                 <Skeleton className="w-32 h-96 rounded-full" />
@@ -122,7 +126,7 @@ const Index = () => {
           </div>
 
           {/* Best Price Recommendation */}
-          <div className={isMobile ? "" : "lg:col-span-7"}>
+          <div className="lg:col-span-7">
             {!isLoading && (
               <BestPriceRecommendation 
                 data={priceData} 
@@ -134,6 +138,6 @@ const Index = () => {
       </main>
     </div>
   );
-};
+}
 
 export default Index;

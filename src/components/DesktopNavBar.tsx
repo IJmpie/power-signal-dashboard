@@ -67,7 +67,7 @@ function StoplichtIcon({ size = 24, ...props }) {
   );
 }
 
-// Custom Frank Icon component
+// Custom Frank Icon component with gray color
 function FrankIcon({ size = 24, ...props }) {
   return (
     <svg
@@ -80,6 +80,7 @@ function FrankIcon({ size = 24, ...props }) {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
+      className="text-gray-400"
       {...props}
     >
       <path d="M9 8h7m-7 4h5" />
